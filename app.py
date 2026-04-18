@@ -206,15 +206,23 @@ y = proc_df[TARGET].values
 CACHE_FILE = os.path.join(os.path.dirname(__file__), "model_artifacts.joblib")
 
 if os.path.exists(CACHE_FILE):
-    # Model previously trained
     artifacts = joblib.load(CACHE_FILE)
     scaler = artifacts["scaler"]
     trained_models = artifacts["trained_models"]
-    eval_results = artifacts["eval_results"]
-    
-    # Needs validation outputs for visualizations on the frontend
+
     _, X_val, _, y_val = train_test_split(X, y, test_size=0.15, random_state=42)
     X_val_sc = scaler.transform(X_val)
+
+    # Re-compute predictions so they match the current y_val exactly
+    eval_results = {}
+    for name, m in trained_models.items():
+        preds = m.predict(X_val_sc)
+        eval_results[name] = {
+            "RMSE": np.sqrt(mean_squared_error(y_val, preds)),
+            "MAE":  mean_absolute_error(y_val, preds),
+            "R²":   r2_score(y_val, preds),
+            "preds": preds,
+        }
 else:
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.15, random_state=42)
     
