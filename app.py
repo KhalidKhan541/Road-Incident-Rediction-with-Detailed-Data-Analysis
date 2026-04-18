@@ -191,10 +191,8 @@ def train_models(X_tr, y_tr):
 
 # ────────────────────────── Load & process ──────────────────────────
 with st.spinner("Loading data…"):
-    try:
-        raw = load_data("train.csv")
-    except Exception:
-        raw = load_data("/mnt/user-data/uploads/train.csv")
+    DATA_PATH = os.path.join(os.path.dirname(__file__), "train.csv")
+    raw = load_data(DATA_PATH)
 
 FEATURE_COLS = ["road_type","num_lanes","curvature","speed_limit","lighting",
                 "weather","road_signs_present","public_road","time_of_day",
@@ -205,7 +203,7 @@ proc_df, label_enc = preprocess(raw)
 X = proc_df[FEATURE_COLS].values
 y = proc_df[TARGET].values
 
-CACHE_FILE = "model_artifacts.joblib"
+CACHE_FILE = os.path.join(os.path.dirname(__file__), "model_artifacts.joblib")
 
 if os.path.exists(CACHE_FILE):
     # Model previously trained
